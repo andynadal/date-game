@@ -1,6 +1,6 @@
 import { challenges, type Challenge } from "@/data/challenges";
 
-export const CHALLENGE_COUNT = 15;
+export const CHALLENGE_COUNT = 7;
 export const WINNING_SCORE = 10;
 
 export type PlayerKey = "player1" | "player2";
@@ -52,7 +52,8 @@ const createRandom = (seed: number) => {
 };
 
 const normalizeName = (name: string, fallback: string) => name.trim() || fallback;
-const normalizeCode = (code: string) => code.trim();
+const normalizeCode = (code: string) => 
+  code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
 export const createChallengeDeck = (gameCode: string): Challenge[] => {
   const seed = createSeedGenerator(normalizeCode(gameCode) || "tiny-hunt")();

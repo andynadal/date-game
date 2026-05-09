@@ -114,6 +114,48 @@ const ScoreChip = ({
   </div>
 );
 
+const ProgressBar = ({
+  currentIndex,
+  totalChallenges,
+  player1Score,
+  player2Score,
+  player1Name,
+  player2Name,
+}: {
+  currentIndex: number;
+  totalChallenges: number;
+  player1Score: number;
+  player2Score: number;
+  player1Name: string;
+  player2Name: string;
+}) => {
+  const progress = ((currentIndex + 1) / totalChallenges) * 100;
+  
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#f8d7aa]" />
+          <span className="text-white/76">{player1Name}: {player1Score}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-white/76">{player2Name}: {player2Score}</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-[#c17151]" />
+        </div>
+      </div>
+      <div className="relative h-3 overflow-hidden rounded-full border border-white/12 bg-slate-950/30">
+        <div 
+          className="h-full rounded-full bg-gradient-to-r from-[#f8d7aa] to-[#c17151] transition-all duration-500 ease-out"
+          style={{ width: `${Math.min(progress, 100)}%` }}
+        />
+      </div>
+      <p className="text-center text-xs text-white/55">
+        Challenge {Math.min(currentIndex + 1, totalChallenges)} of {totalChallenges}
+      </p>
+    </div>
+  );
+};
+
 const AmbientBackdrop = () => (
   <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
     <div className="ambient-orb ambient-orb-left" />
@@ -167,7 +209,7 @@ const SetupScreen = ({
 
           <div className="grid gap-3 text-sm text-white/74 sm:grid-cols-3">
             {[
-              "Use the same game code on both phones to draw the exact same 15 challenges.",
+              "Use the same game code on both phones to draw the exact same 7 challenges.",
               "Tap each card when you are ready, award points, then move to the next round.",
               "Progress is saved in your browser so a refresh does not ruin the mood.",
             ].map((instruction) => (
@@ -192,10 +234,11 @@ const SetupScreen = ({
           <span className="text-sm font-medium text-white/76">Game code</span>
           <input
             value={form.gameCode}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, gameCode: event.target.value }))
-            }
-            placeholder="midnight-terrace"
+            onChange={(event) => {
+              const cleaned = event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+              setForm((current) => ({ ...current, gameCode: cleaned }));
+            }}
+            placeholder="MIDNIGHTTERRACE"
             className="w-full rounded-2xl border border-white/12 bg-slate-950/30 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-[#f8d7aa]/55 focus:bg-slate-950/50"
           />
         </label>
@@ -269,10 +312,14 @@ const GameScreen = ({
             </ActionButton>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <ScoreChip label={game.players.player1} value={game.scores.player1} accent="bg-[#f8d7aa]" />
-            <ScoreChip label={game.players.player2} value={game.scores.player2} accent="bg-[#c17151]" />
-          </div>
+          <ProgressBar
+            currentIndex={game.currentIndex}
+            totalChallenges={game.deck.length}
+            player1Score={game.scores.player1}
+            player2Score={game.scores.player2}
+            player1Name={game.players.player1}
+            player2Name={game.players.player2}
+          />
 
           <div className="rounded-[1.6rem] border border-white/10 bg-slate-950/25 p-4 text-sm leading-7 text-white/72">
             <p className="uppercase tracking-[0.32em] text-white/42">How to play</p>
@@ -283,25 +330,23 @@ const GameScreen = ({
           </div>
         </Surface>
 
-        <Surface className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.32em] text-white/50">Round progress</p>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-xl font-semibold text-white">
-              Challenge {Math.min(game.currentIndex + 1, game.deck.length)} of {game.deck.length}
-            </h3>
+        {outcomeLabel || result ? (
+          <Surface className="space-y-3">
             {outcomeLabel ? (
-              <span className="rounded-full bg-[#f8d7aa]/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#f8d7aa]">
-                {outcomeLabel}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-[#f8d7aa]/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#f8d7aa]">
+                  {outcomeLabel}
+                </span>
+              </div>
             ) : null}
-          </div>
-          {result ? (
-            <div className="rounded-[1.4rem] border border-[#f8d7aa]/20 bg-[#f8d7aa]/10 p-4 text-sm leading-6 text-white/78">
-              <p className="text-base font-semibold text-white">{result.title}</p>
-              <p className="mt-2">{result.detail}</p>
-            </div>
-          ) : null}
-        </Surface>
+            {result ? (
+              <div className="rounded-[1.4rem] border border-[#f8d7aa]/20 bg-[#f8d7aa]/10 p-4 text-sm leading-6 text-white/78">
+                <p className="text-base font-semibold text-white">{result.title}</p>
+                <p className="mt-2">{result.detail}</p>
+              </div>
+            ) : null}
+          </Surface>
+        ) : null}
       </div>
 
       <Surface className="space-y-6">
@@ -393,6 +438,115 @@ const GameScreen = ({
   );
 };
 
+const EndScreen = ({
+  game,
+  onReset,
+}: {
+  game: TinyHuntGame;
+  onReset: () => void;
+}) => {
+  const result = getResultSummary(game);
+  
+  if (!result) {
+    return null;
+  }
+
+  const { player1, player2 } = game.players;
+  const { scores } = game;
+  const player1Won = scores.player1 >= WINNING_SCORE;
+  const player2Won = scores.player2 >= WINNING_SCORE;
+  const isVictory = player1Won || player2Won;
+  
+  return (
+    <div className="relative grid gap-6 lg:grid-cols-1 xl:max-w-3xl xl:mx-auto">
+      {/* Animated particles for end screen */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        {particleSeeds.concat(particleSeeds).map((particle, index) => (
+          <span
+            key={index}
+            className="floating-particle"
+            style={{
+              left: particle.left,
+              top: particle.top,
+              width: particle.size,
+              height: particle.size,
+              animationDelay: `${parseFloat(particle.delay) + index * 0.1}s`,
+              animationDuration: particle.duration,
+              opacity: 0.8,
+            }}
+          />
+        ))}
+      </div>
+
+      <Surface className="relative space-y-6 text-center overflow-hidden">
+        {/* Celebration gradient overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(248,215,170,0.15),transparent_70%)] animate-pulse" />
+        
+        <div className="relative space-y-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#f8d7aa] to-[#c17151] mx-auto animate-bounce">
+            <span className="text-4xl">{isVictory ? "🎉" : "✨"}</span>
+          </div>
+          
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-[0.35em] text-[#f8d7aa]">
+              {isVictory ? "Victory!" : "Game Complete"}
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white">
+              {result.title}
+            </h1>
+            <p className="mx-auto max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
+              {result.detail}
+            </p>
+          </div>
+        </div>
+
+        {/* Score summary */}
+        <div className="relative grid gap-4 sm:grid-cols-2 max-w-md mx-auto">
+          <div className="rounded-[1.6rem] border border-white/12 bg-slate-950/30 p-5 shadow-[0_10px_35px_rgba(15,23,42,0.28)]">
+            <p className="text-xs uppercase tracking-[0.32em] text-white/55 mb-2">{player1}</p>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-3xl font-bold text-white">{scores.player1}</span>
+              <span className="h-3 w-3 rounded-full bg-[#f8d7aa]" />
+            </div>
+            {player1Won && <p className="text-xs text-[#f8d7aa] mt-2">Winner! 👑</p>}
+          </div>
+          
+          <div className="rounded-[1.6rem] border border-white/12 bg-slate-950/30 p-5 shadow-[0_10px_35px_rgba(15,23,42,0.28)]">
+            <p className="text-xs uppercase tracking-[0.32em] text-white/55 mb-2">{player2}</p>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-3xl font-bold text-white">{scores.player2}</span>
+              <span className="h-3 w-3 rounded-full bg-[#c17151]" />
+            </div>
+            {player2Won && <p className="text-xs text-[#f8d7aa] mt-2">Winner! 👑</p>}
+          </div>
+        </div>
+
+        {/* Game stats */}
+        <div className="relative rounded-[1.6rem] border border-white/10 bg-slate-950/25 p-5 text-sm leading-7 text-white/72">
+          <p className="uppercase tracking-[0.32em] text-white/42 mb-3">Game Summary</p>
+          <div className="grid gap-2 text-left">
+            <div className="flex justify-between">
+              <span>Challenges completed:</span>
+              <span className="text-white font-medium">{game.deck.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Game code:</span>
+              <span className="text-white font-medium">{game.gameCode || "tiny-hunt"}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action button */}
+        <div className="relative">
+          <ActionButton onClick={onReset}>
+            Start New Game
+          </ActionButton>
+        </div>
+      </Surface>
+    </div>
+  );
+};
+
 export default function TinyHuntApp() {
   const isHydrated = useSyncExternalStore(
     noopSubscribe,
@@ -465,14 +619,18 @@ export default function TinyHuntApp() {
       <AmbientBackdrop />
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-7xl flex-col justify-center">
         {game ? (
-          <GameScreen
-            game={game}
-            currentChallenge={currentChallenge}
-            onReveal={() => updateGame(revealChallenge)}
-            onRoundOutcome={(outcome) => updateGame((current) => applyRoundOutcome(current, outcome))}
-            onNext={() => updateGame(advanceToNextChallenge)}
-            onReset={resetGame}
-          />
+          game.completedAt ? (
+            <EndScreen game={game} onReset={resetGame} />
+          ) : (
+            <GameScreen
+              game={game}
+              currentChallenge={currentChallenge}
+              onReveal={() => updateGame(revealChallenge)}
+              onRoundOutcome={(outcome) => updateGame((current) => applyRoundOutcome(current, outcome))}
+              onNext={() => updateGame(advanceToNextChallenge)}
+              onReset={resetGame}
+            />
+          )
         ) : (
           <SetupScreen form={form} setForm={setForm} onStart={startGame} />
         )}
