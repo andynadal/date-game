@@ -52,8 +52,11 @@ const createRandom = (seed: number) => {
 };
 
 const normalizeName = (name: string, fallback: string) => name.trim() || fallback;
-const normalizeCode = (code: string) => 
+
+export const cleanGameCode = (code: string) => 
   code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
+const normalizeCode = (code: string) => cleanGameCode(code);
 
 export const createChallengeDeck = (gameCode: string): Challenge[] => {
   const seed = createSeedGenerator(normalizeCode(gameCode) || "tiny-hunt")();

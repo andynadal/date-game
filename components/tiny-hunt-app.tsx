@@ -10,6 +10,7 @@ import {
   getResultSummary,
   isTinyHuntGame,
   revealChallenge,
+  cleanGameCode,
   type RoundOutcome,
   type TinyHuntGame,
   WINNING_SCORE,
@@ -235,12 +236,13 @@ const SetupScreen = ({
           <input
             value={form.gameCode}
             onChange={(event) => {
-              const cleaned = event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+              const cleaned = cleanGameCode(event.target.value);
               setForm((current) => ({ ...current, gameCode: cleaned }));
             }}
-            placeholder="MIDNIGHT-TERRACE"
+            placeholder="MIDNIGHTTERRACE"
             className="w-full rounded-2xl border border-white/12 bg-slate-950/30 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-[#f8d7aa]/55 focus:bg-slate-950/50"
           />
+          <p className="text-xs text-white/50">Spaces and special characters will be automatically removed</p>
         </label>
 
         <label className="block space-y-2">
@@ -457,11 +459,14 @@ const EndScreen = ({
   const player2Won = scores.player2 >= WINNING_SCORE;
   const isVictory = player1Won || player2Won;
   
+  // Memoize the doubled particles array to avoid recreating on every render
+  const endScreenParticles = useMemo(() => particleSeeds.concat(particleSeeds), []);
+  
   return (
     <div className="relative grid gap-6 lg:grid-cols-1 xl:max-w-3xl xl:mx-auto">
       {/* Animated particles for end screen */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {particleSeeds.concat(particleSeeds).map((particle, index) => (
+        {endScreenParticles.map((particle, index) => (
           <span
             key={index}
             className="floating-particle"
