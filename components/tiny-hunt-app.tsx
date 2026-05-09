@@ -38,6 +38,9 @@ const particleSeeds = [
   { left: "90%", top: "72%", size: "0.5rem", delay: "2.1s", duration: "11.5s" },
 ];
 
+// Multiplier for end screen particle density (2x for celebration effect)
+const END_SCREEN_PARTICLE_MULTIPLIER = 2;
+
 const initialFormState: SetupFormState = {
   gameCode: "",
   player1: "",
@@ -459,8 +462,11 @@ const EndScreen = ({
   const player2Won = scores.player2 >= WINNING_SCORE;
   const isVictory = player1Won || player2Won;
   
-  // Memoize the doubled particles array to avoid recreating on every render
-  const endScreenParticles = useMemo(() => particleSeeds.concat(particleSeeds), []);
+  // Memoize the multiplied particles array to avoid recreating on every render
+  const endScreenParticles = useMemo(
+    () => Array(END_SCREEN_PARTICLE_MULTIPLIER).fill(particleSeeds).flat(),
+    []
+  );
   
   return (
     <div className="relative grid gap-6 lg:grid-cols-1 xl:max-w-3xl xl:mx-auto">

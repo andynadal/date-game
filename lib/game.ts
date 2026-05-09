@@ -53,6 +53,16 @@ const createRandom = (seed: number) => {
 
 const normalizeName = (name: string, fallback: string) => name.trim() || fallback;
 
+/**
+ * Cleans a game code by removing all non-alphanumeric characters and converting to uppercase.
+ * This ensures consistent game codes for seeded challenge generation.
+ * 
+ * @param code - The raw game code input
+ * @returns The cleaned game code (alphanumeric uppercase only)
+ * @example
+ * cleanGameCode('test 123!') // Returns 'TEST123'
+ * cleanGameCode('Midnight-Terrace') // Returns 'MIDNIGHTTERRACE'
+ */
 export const cleanGameCode = (code: string) => 
   code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
