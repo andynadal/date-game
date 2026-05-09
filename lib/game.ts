@@ -1,6 +1,6 @@
 import { challenges, type Challenge } from "@/data/challenges";
 
-export const CHALLENGE_COUNT = 15;
+export const CHALLENGE_COUNT = 7;
 export const WINNING_SCORE = 10;
 
 export type PlayerKey = "player1" | "player2";
@@ -52,7 +52,21 @@ const createRandom = (seed: number) => {
 };
 
 const normalizeName = (name: string, fallback: string) => name.trim() || fallback;
-const normalizeCode = (code: string) => code.trim();
+
+/**
+ * Cleans a game code by removing all non-alphanumeric characters and converting to uppercase.
+ * This ensures consistent game codes for seeded challenge generation.
+ * 
+ * @param code - The raw game code input
+ * @returns The cleaned game code (alphanumeric uppercase only)
+ * @example
+ * cleanGameCode('test 123!') // Returns 'TEST123'
+ * cleanGameCode('Midnight-Terrace') // Returns 'MIDNIGHTTERRACE'
+ */
+export const cleanGameCode = (code: string) => 
+  code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
+const normalizeCode = (code: string) => cleanGameCode(code);
 
 export const createChallengeDeck = (gameCode: string): Challenge[] => {
   const seed = createSeedGenerator(normalizeCode(gameCode) || "tiny-hunt")();
