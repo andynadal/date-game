@@ -16,7 +16,7 @@ import {
 } from "@/lib/game";
 
 const STORAGE_KEY = "tiny-hunt-game-state";
-const subscribe = () => () => {};
+const noopSubscribe = () => () => {};
 
 type SetupFormState = {
   gameCode: string;
@@ -395,7 +395,7 @@ const GameScreen = ({
 
 export default function TinyHuntApp() {
   const isHydrated = useSyncExternalStore(
-    subscribe,
+    noopSubscribe,
     () => true,
     () => false,
   );
@@ -434,8 +434,8 @@ export default function TinyHuntApp() {
 
   const currentChallenge = useMemo(() => (game ? getCurrentChallenge(game) : null), [game]);
 
-  const updateGame = (updater: (current: TinyHuntGame) => TinyHuntGame) => {
-    setGame((current) => (current ? updater(current) : current));
+  const updateGame = (gameUpdater: (currentGame: TinyHuntGame) => TinyHuntGame) => {
+    setGame((currentGame) => (currentGame ? gameUpdater(currentGame) : currentGame));
   };
 
   const startGame = () => {

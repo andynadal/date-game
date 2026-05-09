@@ -24,7 +24,7 @@ type CreateGameInput = {
   player2: string;
 };
 
-const hashSeed = (value: string): (() => number) => {
+const createSeedGenerator = (value: string): (() => number) => {
   let hash = 1779033703 ^ value.length;
 
   for (let index = 0; index < value.length; index += 1) {
@@ -55,7 +55,7 @@ const normalizeName = (name: string, fallback: string) => name.trim() || fallbac
 const normalizeCode = (code: string) => code.trim();
 
 export const createChallengeDeck = (gameCode: string): Challenge[] => {
-  const seed = hashSeed(normalizeCode(gameCode) || "tiny-hunt")();
+  const seed = createSeedGenerator(normalizeCode(gameCode) || "tiny-hunt")();
   const random = createRandom(seed);
   const deck = [...challenges];
 
