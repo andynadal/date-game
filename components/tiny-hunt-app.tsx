@@ -238,7 +238,7 @@ const SetupScreen = ({
               const cleaned = event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
               setForm((current) => ({ ...current, gameCode: cleaned }));
             }}
-            placeholder="MIDNIGHTTERRACE"
+            placeholder="MIDNIGHT-TERRACE"
             className="w-full rounded-2xl border border-white/12 bg-slate-950/30 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-[#f8d7aa]/55 focus:bg-slate-950/50"
           />
         </label>
