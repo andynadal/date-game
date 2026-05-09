@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Test and debug files
+test-game*.js
+debug-*.js
+play-game.js
+screenshots/
+test-results/
